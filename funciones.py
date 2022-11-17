@@ -98,12 +98,12 @@ def agregar_FEL(FEL, evento):
 
 
 def imprimir_encabezado():
-    print("{:<8},{:<15},{:<10},{:<10},{:<10}".format(
-        'tiempo', 'evento', 'persona', 'servidor', "cola"))
+    print("{:<8},{:<15},{:<10},{:<10},{:<10},{:<10}".format(
+        'tiempo', 'evento', 'persona', 'servidor', "cola", "cola caja"))
 
 
-def imprimir_evento(evento, Cajas):
-    tiempo = evento[1]
+def imprimir_evento(evento, cola, Cajas):
+    tiempo = round(evento[1])
     name = "None"
     if evento[0] == LLEGADA:
         name = "LLEGADA"
@@ -114,9 +114,12 @@ def imprimir_evento(evento, Cajas):
     elif evento[0] == SALIDA:
         name = "SALIDA"
     persona = evento[2]
+    cola = len(cola)
     servidor = "-"
-    cola = (len(Cajas[evento[3]][2]))
+    caja = 0
     if len(evento) == 4:
         servidor = evento[3]
-    print("{:<8},{:<15},{:<10},{:<10},{:<10}".format(
-        tiempo, name, persona, servidor, cola))
+        caja = len(Cajas[evento[3]][2])
+    #print(tiempo, name, persona, servidor, agenda_cola)
+    print("{:<8},{:<15},{:<10},{:<10},{:<10},{:<10}".format(
+        tiempo, name, persona, servidor, cola, caja))

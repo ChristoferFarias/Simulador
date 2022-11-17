@@ -29,46 +29,52 @@ for i in range(0, 10):
 
 def loop_rutinas():
     reloj = 0
-    atributos = crear_atributos()
-    primer_evento = (LLEGADA, 5, 1, atributos)
+    cliente = crear_atributos()
+    eleccion = chequear_colas(Cajas, cliente)
+    primer_evento = (LLEGADA, 5, 1, eleccion)
     FEL = [primer_evento]
+    cola = []
     agenda_cola = []
     imprimir_encabezado()
-    for i in range(20):
+    for i in range(100):
         evento, reloj = tiempo_rutina(FEL, reloj)
-        imprimir_evento(evento, len(agenda_cola))
+        imprimir_evento(evento, agenda_cola, Cajas)
         if evento[0] == LLEGADA:
-            llegada_cajas(evento[2], FEL, reloj, Cajas, agenda_cola)
+            llegada_cajas(evento[2], FEL, reloj, Cajas, agenda_cola, cola)
         elif evento[0] == ELECCION:
             eleccion_cola(evento[2], FEL, reloj, Cajas, agenda_cola)
         elif evento[0] == ATENDER:
-            atencion(evento[2], FEL, reloj, Cajas, eleccion)
+            atencion(evento[2], FEL, reloj, Cajas, evento[3])
         elif evento[0] == SALIDA:
-            salida(evento[2], FEL, reloj, Cajas, eleccion)
+            salida(evento[2], FEL, reloj, Cajas, evento[3])
     return
 
 
 ####################### RUTINAS #######################
 
-def llegada_cajas(n, FEL, tiempo_evento, Cajas, agenda_cola):
+def llegada_cajas(n, FEL, tiempo_evento, Cajas, agenda_cola, cola):
     global cliente, eleccion
     tiempo = tiempo_prox_llegada(tiempo_evento)
     atributos = crear_atributos()
+    evento = (LLEGADA, tiempo, n+1)
+    agregar_FEL(FEL, evento)
     cliente = (atributos)
     eleccion = chequear_colas(Cajas, cliente)
-    evento = (ELECCION, tiempo_evento, n, eleccion)
-    agregar_FEL(FEL, evento)
-    agenda_cola.append(evento)
+    if len(Cajas[eleccion][2]) <= 10 and Cajas[eleccion][1] == DISPONIBLE:
+        evento = (ELECCION, tiempo_evento, n, eleccion)
+        agregar_FEL(FEL, evento)
+        agenda_cola.append(evento)
+    cola.append(n)
     return
 
 
 def eleccion_cola(n, FEL, tiempo_evento, Cajas, agenda_cola):
-    tiempo = tiempo_espera(tiempo_evento)
     caja = agenda_cola[0][3]
-    Cajas[caja][2].append(cliente)
+    Cajas[caja][2].append(n)
     agenda_cola.pop(0)
-    if Cajas[caja][2] == 1 and Cajas[caja][1]:
-        evento = (ATENDER, tiempo, n+1)
+    tiempo = tiempo_espera(tiempo_evento)
+    if (Cajas[caja][1] == DISPONIBLE):
+        evento = (ATENDER, tiempo, n+1, caja)
         agregar_FEL(FEL, evento)
     return
 

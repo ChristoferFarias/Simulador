@@ -1,14 +1,16 @@
 from numpy.random import SeedSequence
 import random
 from rutina_random import obt_tiempo_espera, obt_prox_llegada, obt_prox_salida_Auto, obt_prox_salida_Clasica
-
+import csv
+from matplotlib import pyplot as plt
 
 LLEGADA = 0
 ELECCION = 1
 ATENDER = 2
 SALIDA = 3
 
-####################### TIEMPOS #######################
+
+####################### TIEMPOS ALEATORIOS #######################
 
 
 def tiempo_rutina(FEL, reloj):
@@ -23,16 +25,42 @@ def tiempo_prox_llegada(tiempo_evento):
 
 
 def tiempo_prox_salida(tiempo_evento, eleccion):
-    if (eleccion == 9):
-        tiempo_entre_salidas = obt_prox_salida_Auto()
+    if (eleccion == 4):
+        tiempo_entre_salidas = obt_prox_salida_Auto()+2
     else:
-        tiempo_entre_salidas = obt_prox_salida_Clasica()
+        tiempo_entre_salidas = obt_prox_salida_Clasica()+2
     return tiempo_evento + tiempo_entre_salidas
 
 
-def tiempo_espera(tiempo_evento):
-    tiempo_de_espera = obt_tiempo_espera()
+def tiempo_espera(tiempo_evento, clientes):
+    tiempo_productos = clientes[2]*0.1
+    tiempo_de_espera = obt_tiempo_espera()+tiempo_productos
     return tiempo_evento + tiempo_de_espera
+
+####################### TIEMPOS DETERMINISTAS #######################
+
+# def tiempo_rutina(FEL, reloj):
+#    evento_siguiente = FEL.pop(0)
+#    reloj = evento_siguiente[1]
+#    return evento_siguiente, reloj
+
+
+# def tiempo_prox_llegada(tiempo_evento):
+#    tiempo_entre_llegadas = 1
+#    return tiempo_evento + tiempo_entre_llegadas
+
+
+# def tiempo_prox_salida(tiempo_evento, eleccion):
+#    if (eleccion == 2):
+#        tiempo_entre_salidas = 5
+#    else:
+#        tiempo_entre_salidas = 8
+#    return tiempo_evento + tiempo_entre_salidas
+
+
+# def tiempo_espera(tiempo_evento):
+#    tiempo_de_espera = 5
+#    return tiempo_evento + tiempo_de_espera
 
 
 ####################### Auxiliares #######################
@@ -74,10 +102,10 @@ def chequear_colas(Cajas, evento):
     if Cajas[colamin][0] == "auto":
         c = chequear_requisitos(evento[0], evento[1], evento[2])
         if c == "cumple":
-            print("cumple")
+            # print("cumple")
             return colamin
         else:
-            print("no cumple")
+            #print("no cumple")
             min_cola = 100
             colamin = -1
             for i in range(len(Cajas)-1):
@@ -102,8 +130,56 @@ def imprimir_encabezado():
         'tiempo', 'evento', 'persona', 'servidor', "cola", "cola caja"))
 
 
+def crear_titulo():
+    reporte = open("reporte.csv", "a", newline="")
+    escribir = csv.writer(reporte)
+    titulo = ("tiempo", "nombre", "persona", "servidor", "cola", "caja")
+    escribir.writerow(titulo)
+    reporte.close
+
+
+def generar_reporte(tiempo, nombre, persona, servidor, cola, caja):
+    global tiempos, llegadas, atenciones
+    reporte = open("reporte.csv", "a", newline="")
+    escribir = csv.writer(reporte)
+    evento = (tiempo, nombre, persona, servidor, cola, caja)
+    escribir.writerow(evento)
+    reporte.close
+
+
+def graficos(tiempos, llegada, eleccion, atencion, salida):
+    plt.plot(tiempos, llegada)
+    plt.xlabel('tiempos')
+    plt.ylabel('llegadas')
+    plt.savefig("tiempo_llegada.png")
+    plt.clf()
+    plt.plot(tiempos, eleccion)
+    plt.xlabel('tiempos')
+    plt.ylabel('elecciones')
+    plt.savefig("tiempo_elecciones.png")
+    plt.clf()
+    plt.plot(tiempos, atencion)
+    plt.xlabel('tiempos')
+    plt.ylabel('atenciones')
+    plt.savefig("tiempo_atenciones.png")
+    plt.clf()
+    plt.plot(tiempos, salida)
+    plt.xlabel('tiempos')
+    plt.ylabel('salidas')
+    plt.savefig("tiempo_salidas.png")
+    plt.clf()
+    plt.plot(tiempos, llegada)
+    plt.plot(tiempos, eleccion)
+    plt.plot(tiempos, atencion)
+    plt.plot(tiempos, salida)
+    plt.xlabel('tiempos')
+    plt.ylabel('eventos')
+    plt.savefig("tiempo_eventos.png")
+
+
 def imprimir_evento(evento, cola, Cajas):
-    tiempo = round(evento[1])
+    global llegadas_clientes, atenciones
+    tiempo = round(evento[1], 2)
     name = "None"
     if evento[0] == LLEGADA:
         name = "LLEGADA"
@@ -121,5 +197,6 @@ def imprimir_evento(evento, cola, Cajas):
         servidor = evento[3]
         caja = len(Cajas[evento[3]][2])
     #print(tiempo, name, persona, servidor, agenda_cola)
-    print("{:<8},{:<15},{:<10},{:<10},{:<10},{:<10}".format(
-        tiempo, name, persona, servidor, cola, caja))
+    generar_reporte(tiempo, name, persona, servidor, cola, caja)
+    # print("{:<8},{:<15},{:<10},{:<10},{:<10},{:<10}".format(
+    #    tiempo, name, persona, servidor, cola, caja))

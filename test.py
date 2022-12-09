@@ -6,8 +6,9 @@ SALIDA = 2
 Cajas = []
 DISPONIBLE = 1
 OCUPADA = 0
-for i in range(0, 10):
-    if i != 9:
+n_cajas = 10
+for i in range(0, n_cajas):
+    if i != (n_cajas-1):
         Caja = [i, DISPONIBLE, []]
         Cajas.append(Caja)
     else:
@@ -90,11 +91,15 @@ cliente = (atributos)
 print(cliente)
 eleccion = chequear_colas(Cajas, cliente)
 print(eleccion)
-evento = (LLEGADA, 1, 0, eleccion)
+evento = (LLEGADA, 1, 1, eleccion)
 agenda_cola.append(evento)
-evento = (SALIDA, 1, 0, 5)
+Cajas[1][2].append(evento[2])
+evento = (SALIDA, 1, 2, 5)
 agenda_cola.append(evento)
-print(agenda_cola)
-print(agenda_cola[0][3])
-agenda_cola.pop(0)
-print(agenda_cola[0])
+# print(agenda_cola)
+# print(agenda_cola[0][3])
+# agenda_cola.pop(0)
+# print(agenda_cola[0])
+print(Cajas[1])
+Cajas[1][2].append(evento[2])
+print(Cajas[1][2])

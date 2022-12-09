@@ -4,10 +4,10 @@ from numpy.random import MT19937, Generator, SeedSequence
 sg = SeedSequence(1234)
 sAuto = SeedSequence(1234)
 sClasica = SeedSequence(1234)
-sEspera = SeedSequence(312)
-lambdaS = 0.5
-muClasica = 0.3
-muAuto = 0.2
+sEspera = SeedSequence(1234)
+lambdaS = 20
+muClasica = 0.5
+muAuto = 3
 
 
 def obt_prox_llegada():

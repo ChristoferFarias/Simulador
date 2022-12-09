@@ -1,4 +1,4 @@
-from funciones import tiempo_rutina, tiempo_espera, tiempo_prox_llegada, tiempo_prox_salida, crear_atributos, chequear_colas, agregar_FEL, imprimir_evento, imprimir_encabezado
+from funciones import graficos, crear_titulo, tiempo_rutina, tiempo_espera, tiempo_prox_llegada, tiempo_prox_salida, crear_atributos, chequear_colas, agregar_FEL, imprimir_evento, imprimir_encabezado
 
 
 # Variables
@@ -6,47 +6,71 @@ LLEGADA = 0
 ELECCION = 1
 ATENDER = 2
 SALIDA = 3
-Cajas = []
 DISPONIBLE = 1
 OCUPADA = 0
 FEL = []
-agenda_cola = []
-n = 0
-
-
-for i in range(0, 10):
-    # print(i)
-    if i != 9:
-        Caja = [i, DISPONIBLE, []]
-        Cajas.append(Caja)
-    else:
-        Caja = ["auto", DISPONIBLE, []]
-        Cajas.append(Caja)
+tiempos = []
+llegadas = []
+atenciones = []
+elecciones = []
+salidas = []
+filas = []
 # print(Cajas)
 
 
 ####################### LOOP #######################
 
-def loop_rutinas():
-    reloj = 0
+def inicio():
+    global Cajas, n, agenda_cola, FEL
+    Cajas = []
+    agenda_cola = []
+    n = 0
+    n_cajas = 5
+    for i in range(0, n_cajas):
+        if i != (n_cajas-1):
+            Caja = [i, DISPONIBLE, []]
+            Cajas.append(Caja)
+        else:
+            Caja = ["auto", DISPONIBLE, []]
+            Cajas.append(Caja)
     cliente = crear_atributos()
     eleccion = chequear_colas(Cajas, cliente)
-    primer_evento = (LLEGADA, 5, 1, eleccion)
+    primer_evento = (LLEGADA, 3, 1, eleccion)
     FEL = [primer_evento]
+
+
+def loop_rutinas(numero_rutinas):
+    global cola
+    reloj = 0
     cola = []
     agenda_cola = []
+    llegadas_clientes = 0
+    atenciones_clientes = 0
+    elecciones_clientes = 0
+    salidas_clientes = 0
     imprimir_encabezado()
-    for i in range(100):
+    crear_titulo()
+    for i in range(numero_rutinas):
         evento, reloj = tiempo_rutina(FEL, reloj)
         imprimir_evento(evento, agenda_cola, Cajas)
         if evento[0] == LLEGADA:
             llegada_cajas(evento[2], FEL, reloj, Cajas, agenda_cola, cola)
+            llegadas_clientes += 1
         elif evento[0] == ELECCION:
-            eleccion_cola(evento[2], FEL, reloj, Cajas, agenda_cola)
+            eleccion_cola(evento[2], FEL, reloj, Cajas, agenda_cola, cliente)
+            elecciones_clientes += 1
         elif evento[0] == ATENDER:
             atencion(evento[2], FEL, reloj, Cajas, evento[3])
+            atenciones_clientes += 1
         elif evento[0] == SALIDA:
             salida(evento[2], FEL, reloj, Cajas, evento[3])
+            salidas_clientes += 1
+        tiempos.append(reloj)
+        llegadas.append(llegadas_clientes)
+        elecciones.append(elecciones_clientes)
+        atenciones.append(atenciones_clientes)
+        salidas.append(salidas_clientes)
+    graficos(tiempos, llegadas, elecciones, atenciones, salidas)
     return
 
 
@@ -58,9 +82,9 @@ def llegada_cajas(n, FEL, tiempo_evento, Cajas, agenda_cola, cola):
     atributos = crear_atributos()
     evento = (LLEGADA, tiempo, n+1)
     agregar_FEL(FEL, evento)
-    cliente = (atributos)
+    cliente = atributos
     eleccion = chequear_colas(Cajas, cliente)
-    if len(Cajas[eleccion][2]) <= 10 and Cajas[eleccion][1] == DISPONIBLE:
+    if len(Cajas[eleccion][2]) <= 10:
         evento = (ELECCION, tiempo_evento, n, eleccion)
         agregar_FEL(FEL, evento)
         agenda_cola.append(evento)
@@ -68,13 +92,16 @@ def llegada_cajas(n, FEL, tiempo_evento, Cajas, agenda_cola, cola):
     return
 
 
-def eleccion_cola(n, FEL, tiempo_evento, Cajas, agenda_cola):
+def eleccion_cola(n, FEL, tiempo_evento, Cajas, agenda_cola, cliente):
     caja = agenda_cola[0][3]
     Cajas[caja][2].append(n)
+    # print(Cajas[caja][2])
     agenda_cola.pop(0)
-    tiempo = tiempo_espera(tiempo_evento)
-    if (Cajas[caja][1] == DISPONIBLE):
-        evento = (ATENDER, tiempo, n+1, caja)
+    cola.pop(0)
+    tiempo = tiempo_espera(tiempo_evento, cliente)
+    if (Cajas[caja][1] == DISPONIBLE and len(Cajas[caja][2]) == 1):
+        n = Cajas[caja][2].pop(0)
+        evento = (ATENDER, tiempo, n, caja)
         agregar_FEL(FEL, evento)
     return
 
